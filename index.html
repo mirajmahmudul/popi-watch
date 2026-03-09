@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POPI — Skeleton Automatic</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Barlow+Condensed:wght@200;300;400;600&family=Barlow:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{--gold:#b8912a;--gold2:#d4aa40;--silver:#c8c8c6;--ink:#000;}
+html,body{width:100%;height:100%;overflow-x:hidden;}
+body{background:var(--ink);color:var(--silver);font-family:'Barlow',sans-serif;font-weight:300;cursor:none;}
+#cv{position:fixed;inset:0;z-index:0;display:block;width:100%;height:100%;}
+#c-dot{position:fixed;z-index:9999;pointer-events:none;width:7px;height:7px;background:#fff;border-radius:50%;transform:translate(-50%,-50%);mix-blend-mode:difference;}
+#c-ring{position:fixed;z-index:9998;pointer-events:none;width:36px;height:36px;border:1px solid rgba(184,145,42,0.45);border-radius:50%;transform:translate(-50%,-50%);transition:width .4s,height .4s,border-color .3s;}
+body.hl #c-ring{width:55px;height:55px;border-color:var(--gold2);}
+#grain{position:fixed;inset:0;z-index:800;pointer-events:none;opacity:.026;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");background-size:120px;animation:ga .3s steps(1) infinite;}
+@keyframes ga{0%{background-position:0 0}33%{background-position:-55px 25px}66%{background-position:25px -55px}}
+#ldr{position:fixed;inset:0;background:#000;z-index:5000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;transition:opacity 2s ease,visibility 2s ease;}
+#ldr.out{opacity:0;visibility:hidden;pointer-events:none;}
+.l-t{font-family:'Playfair Display',serif;font-size:64px;letter-spacing:.5em;text-indent:.5em;color:#fff;font-weight:400;text-shadow:0 0 80px rgba(184,145,42,0.2);}
+.l-b{width:260px;height:1px;background:rgba(255,255,255,0.08);position:relative;overflow:hidden;}
+.l-f{position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--gold),var(--gold2),transparent);width:0%;transition:width .06s;}
+.l-p{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.5em;color:rgba(200,200,196,0.3);text-transform:uppercase;}
+#pb{position:fixed;top:0;left:0;height:1px;z-index:600;background:linear-gradient(90deg,var(--gold),var(--gold2));width:0%;transition:width .1s;}
+nav{position:fixed;top:0;left:0;right:0;z-index:300;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 52px;transition:background .5s;}
+nav.sol{background:rgba(0,0,0,0.9);backdrop-filter:blur(14px);}
+.nl{font-family:'Playfair Display',serif;font-size:20px;letter-spacing:.3em;text-indent:.3em;color:#fff;text-decoration:none;font-weight:400;}
+.nm{display:flex;gap:40px;list-style:none;position:absolute;left:50%;transform:translateX(-50%);}
+.nm a{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:rgba(200,200,196,0.3);text-decoration:none;transition:color .3s;}
+.nm a:hover{color:var(--gold2);}
+.nc{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(184,145,42,0.35);padding:9px 24px;text-decoration:none;position:relative;overflow:hidden;transition:color .4s;}
+.nc::after{content:'';position:absolute;inset:0;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .4s cubic-bezier(.4,0,.2,1);}
+.nc:hover::after{transform:scaleX(1);}
+.nc span{position:relative;z-index:1;}
+.nc:hover span{color:#000;}
+.hud{position:fixed;z-index:250;pointer-events:none;font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:.28em;line-height:2.2;color:rgba(200,200,196,0.16);text-transform:uppercase;}
+#htl{top:74px;left:52px;}
+#hbr{bottom:32px;right:52px;text-align:right;}
+#hbl{bottom:32px;left:52px;}
+/* TEXT PANELS */
+.tp{position:fixed;z-index:200;pointer-events:none;opacity:0;transition:opacity .7s ease;padding:0 56px;top:50%;transform:translateY(-50%);}
+#t0{top:auto;bottom:72px;transform:none;left:0;right:0;}
+.tl{max-width:380px;}
+.tr{max-width:380px;margin-left:auto;text-align:right;}
+.tc{text-align:center;max-width:540px;margin:0 auto;}
+.ey{font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:.5em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.ey::before{content:'';width:16px;height:1px;background:var(--gold);flex-shrink:0;}
+.tr .ey{justify-content:flex-end;}
+.tr .ey::before{display:none;}
+.tr .ey::after{content:'';width:16px;height:1px;background:var(--gold);flex-shrink:0;}
+.tc .ey{justify-content:center;}
+.tc .ey::before{display:none;}
+.sh{font-family:'Playfair Display',serif;font-size:clamp(38px,4.8vw,62px);font-weight:400;line-height:1.05;color:#fff;}
+.sh em{font-style:italic;color:var(--gold2);}
+.sb{font-size:13px;line-height:1.95;color:rgba(200,200,196,0.38);margin-top:14px;max-width:320px;}
+.tr .sb{margin-left:auto;}
+.ss{display:flex;flex-wrap:wrap;gap:18px;margin-top:22px;padding-top:18px;border-top:1px solid rgba(200,200,196,0.06);}
+.tr .ss{justify-content:flex-end;}
+.sv{font-family:'Playfair Display',serif;font-size:24px;font-weight:400;color:#fff;line-height:1;}
+.sv sup{font-size:.42em;color:var(--gold);vertical-align:super;}
+.sl{font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:.2em;color:rgba(200,200,196,0.2);text-transform:uppercase;margin-top:4px;}
+.jd{display:inline-block;width:6px;height:6px;border-radius:50%;vertical-align:middle;margin-right:7px;margin-bottom:1px;}
+.hbig{font-family:'Playfair Display',serif;font-size:clamp(100px,15vw,180px);font-weight:900;line-height:.87;color:#fff;letter-spacing:-.02em;}
+.hbig em{display:block;font-style:italic;font-weight:400;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,0.18);font-size:.6em;letter-spacing:.03em;}
+.hsub{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.4em;color:rgba(200,200,196,0.28);text-transform:uppercase;margin-top:20px;}
+#si{position:fixed;bottom:36px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;align-items:center;gap:8px;font-family:'Barlow Condensed',sans-serif;font-size:8px;letter-spacing:.5em;color:rgba(200,200,196,0.14);text-transform:uppercase;text-indent:.5em;opacity:0;animation:fu 1s 2.5s forwards;pointer-events:none;}
+#si i{display:block;width:1px;height:46px;background:linear-gradient(to bottom,rgba(184,145,42,0.5),transparent);animation:dr 2.5s ease-in-out infinite;}
+@keyframes dr{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+@keyframes fu{from{opacity:0;transform:translateX(-50%) translateY(12px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.bg{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.4em;text-transform:uppercase;background:#fff;color:#000;padding:14px 50px;text-decoration:none;display:inline-block;transition:background .3s;}
+.bg:hover{background:var(--gold2);}
+.bo{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(184,145,42,0.35);padding:14px 50px;text-decoration:none;display:inline-block;margin-left:14px;transition:all .3s;}
+.bo:hover{background:var(--gold);color:#000;}
+#sp{height:650vh;}
+@media(max-width:800px){nav{padding:0 20px;}.nm{display:none;}.tp{padding:0 20px;}#htl{display:none;}}
+</style>
+</head>
+<body>
+<div id="grain"></div>
+<div id="pb"></div>
+<div id="c-dot"></div>
+<div id="c-ring"></div>
+<div id="ldr"><div class="l-t">POPI</div><div class="l-b"><div class="l-f" id="lf"></div></div><div class="l-p" id="lp">Crafting — 0%</div></div>
+<canvas id="cv"></canvas>
+<nav id="nv"><a href="#" class="nl">POPI</a><ul class="nm"><li><a href="#">Architecture</a></li><li><a href="#">Movement</a></li><li><a href="#">Jewels</a></li><li><a href="#">Collection</a></li></ul><a href="#" class="nc"><span>Reserve</span></a></nav>
+<div class="hud" id="htl"><div>SKELETON AUTO · SA-001</div><div>Ø42mm · 316L STEEL · 11.4T</div><div id="hr">— — —</div></div>
+<div class="hud" id="hbr"><div>28800 VPH · 72h RESERVE</div><div>21 JEWELS · SAPPHIRE CRYSTAL</div><div id="ht">--:--:--</div></div>
+<div class="hud" id="hbl"><div id="hxy">X 0000 Y 0000</div><div id="hfps">FPS 60</div></div>
+<!-- TEXT PANELS -->
+<div class="tp" id="t0"><div class="tl"><div class="hbig">POPI<em>Automatic</em></div><div class="hsub">Skeleton · 316L Steel · 99 Pieces · 2025</div></div></div>
+<div class="tp" id="t1"><div class="tl"><div class="ey">Architecture</div><div class="sh">Engineered<br><em>Precision</em></div><div class="sb">Every tolerance held to a micron. The skeleton movement exposes the soul of horology — nothing between eye and movement.</div><div class="ss"><div><div class="sv">42<sup>mm</sup></div><div class="sl">Diameter</div></div><div><div class="sv">316L</div><div class="sl">Steel</div></div><div><div class="sv">11.4<sup>mm</sup></div><div class="sl">Thickness</div></div></div></div></div>
+<div class="tp" id="t2"><div class="tr"><div class="ey">Movement</div><div class="sh">Open<br><em>Calibre</em></div><div class="sb">Gold barrel and brass gear train in full view. Wound by wrist motion alone — 72 hours of stored energy.</div><div class="ss"><div><div class="sv">28800</div><div class="sl">VPH Beat</div></div><div><div class="sv">72<sup>h</sup></div><div class="sl">Reserve</div></div><div><div class="sv">±4<sup>s/d</sup></div><div class="sl">Accuracy</div></div></div></div></div>
+<div class="tp" id="t3"><div class="tl"><div class="ey">Jewels</div><div class="sh"><em>21</em> Synthetic<br>Rubies</div><div class="sb" style="margin-top:12px"><div style="margin-bottom:7px"><span class="jd" style="background:#1a66bb;box-shadow:0 0 5px #1a66bb"></span>Cobalt blue screws</div><div style="margin-bottom:7px"><span class="jd" style="background:#c9a020;box-shadow:0 0 5px #c9a020"></span>Gold gear train</div><div><span class="jd" style="background:#7c3d9e;box-shadow:0 0 5px #7c3d9e"></span>Purple ruby bearings</div></div><div class="ss"><div><div class="sv">21</div><div class="sl">Jewels</div></div><div><div class="sv">3</div><div class="sl">Bridges</div></div></div></div></div>
+<div class="tp" id="t4"><div class="tr"><div class="ey">Crystal</div><div class="sh">Sapphire<br><em>Clarity</em></div><div class="sb">Anti-reflective on both faces. Hardness 9 Mohs — second only to diamond.</div><div class="ss"><div><div class="sv">9</div><div class="sl">Mohs</div></div><div><div class="sv">AR</div><div class="sl">Both Sides</div></div><div><div class="sv">10<sup>bar</sup></div><div class="sl">WR</div></div></div></div></div>
+<div class="tp" id="t5"><div class="tl"><div class="ey">Bracelet</div><div class="sh">Integrated<br><em>Steel</em></div><div class="sb">Alternating brushed and mirror-polished 316L links machined to case specification. Zero visual interruption.</div><div class="ss"><div><div class="sv">22<sup>mm</sup></div><div class="sl">Width</div></div><div><div class="sv">5</div><div class="sl">Link Rows</div></div></div></div></div>
+<div class="tp" id="t6"><div class="tc"><div class="ey" style="justify-content:center">Collection · 2025</div><div class="sh" style="font-size:clamp(48px,6.5vw,82px);text-align:center">Own the<br><em>Movement</em></div><div class="sb" style="text-align:center;margin:14px auto 0;max-width:340px">Limited to 99 pieces. Every gear polished by hand.</div><div style="text-align:center;margin-top:32px"><a href="#" class="bg">Reserve Yours</a><a href="#" class="bo">View All</a></div></div></div>
+<div id="si">Scroll<i></i></div>
+<div id="sp"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+'use strict';
+/* ── CURSOR ── */
+const cDot=document.getElementById('c-dot'),cRing=document.getElementById('c-ring');
+let mx=window.innerWidth/2,my=window.innerHeight/2,rx=mx,ry=my;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cDot.style.left=mx+'px';cDot.style.top=my+'px';document.getElementById('hxy').textContent=`X ${String(mx|0).padStart(4,'0')} Y ${String(my|0).padStart(4,'0')}`;});
+document.querySelectorAll('a,button').forEach(el=>{el.addEventListener('mouseenter',()=>document.body.classList.add('hl'));el.addEventListener('mouseleave',()=>document.body.classList.remove('hl'));});
+(function cl(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;cRing.style.left=rx+'px';cRing.style.top=ry+'px';requestAnimationFrame(cl);})();
+/* ── CLOCK ── */
+setInterval(()=>{const d=new Date();document.getElementById('ht').textContent=[d.getHours(),d.getMinutes(),d.getSeconds()].map(n=>String(n).padStart(2,'0')).join(':');},1000);
+let fc=0,fl=performance.now();(function ft(t){fc++;if(t-fl>=1e3){document.getElementById('hfps').textContent='FPS '+fc;fc=0;fl=t;}requestAnimationFrame(ft);})();
+
+/* ━━━━━━━━ THREE.JS SETUP ━━━━━━━━ */
+const cv=document.getElementById('cv');
+const R=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:false,powerPreference:'high-performance'});
+R.setPixelRatio(Math.min(devicePixelRatio,2));
+R.setSize(innerWidth,innerHeight);
+R.shadowMap.enabled=true;
+R.shadowMap.type=THREE.PCFSoftShadowMap;
+R.toneMapping=THREE.ACESFilmicToneMapping;
+R.toneMappingExposure=1.4;
+const S=new THREE.Scene();
+S.background=new THREE.Color(0x000000);
+// Subtle dark blue-grey fog for depth
+S.fog=new THREE.FogExp2(0x000000,0.028);
+const CAM=new THREE.PerspectiveCamera(40,innerWidth/innerHeight,0.01,200);
+CAM.position.set(0,1.2,9);
+CAM.lookAt(0,0,0);
+window.addEventListener('resize',()=>{R.setSize(innerWidth,innerHeight);CAM.aspect=innerWidth/innerHeight;CAM.updateProjectionMatrix();});
+
+/* ── LIGHTS ── */
+// Key light — warm, from upper right
+const kl=new THREE.DirectionalLight(0xfff5e0,4.5);
+kl.position.set(6,10,8);kl.castShadow=true;
+kl.shadow.mapSize.width=2048;kl.shadow.mapSize.height=2048;
+kl.shadow.camera.near=1;kl.shadow.camera.far=40;
+kl.shadow.camera.left=-6;kl.shadow.camera.right=6;
+kl.shadow.camera.top=6;kl.shadow.camera.bottom=-6;
+S.add(kl);
+// Fill — cool blue from left
+const fl2=new THREE.DirectionalLight(0x8090cc,1.2);fl2.position.set(-8,2,4);S.add(fl2);
+// Rim — gold from below-back (simulates reflection)
+const rl=new THREE.DirectionalLight(0xd4aa30,1.5);rl.position.set(0,-6,-8);S.add(rl);
+// Top light for crystal highlight
+const tl2=new THREE.DirectionalLight(0xffffff,1.8);tl2.position.set(0,12,5);S.add(tl2);
+// Ambient
+S.add(new THREE.AmbientLight(0x0a0a18,2.5));
+// Jewel point lights
+const jl1=new THREE.PointLight(0x2244ff,0,3);jl1.position.set(0,0,2);S.add(jl1);
+const jl2=new THREE.PointLight(0x8833bb,0,3);jl2.position.set(0,0,2);S.add(jl2);
+
+/* ── MATERIALS ── */
+const envMap=null;
+const M={
+  // Polished steel — very reflective
+  steel:new THREE.MeshStandardMaterial({color:0xd0d0ce,metalness:.97,roughness:.04}),
+  // Brushed steel — slightly rougher
+  steelB:new THREE.MeshStandardMaterial({color:0x9a9a98,metalness:.92,roughness:.22}),
+  // Dark steel for case side
+  steelD:new THREE.MeshStandardMaterial({color:0x787876,metalness:.88,roughness:.18}),
+  // Gold — deep warm
+  gold:new THREE.MeshStandardMaterial({color:0xc9a020,metalness:.90,roughness:.15}),
+  // Bright gold
+  goldB:new THREE.MeshStandardMaterial({color:0xddb830,metalness:.88,roughness:.1}),
+  // Silver bridge — silvery with slight roughness
+  bridge:new THREE.MeshStandardMaterial({color:0xb8b8b6,metalness:.88,roughness:.12}),
+  // Blue screw
+  blue:new THREE.MeshStandardMaterial({color:0x2255dd,emissive:0x0a1a88,emissiveIntensity:.6,metalness:.5,roughness:.2}),
+  // Purple jewel
+  ruby:new THREE.MeshStandardMaterial({color:0x8833bb,emissive:0x44116a,emissiveIntensity:.8,metalness:.1,roughness:.15}),
+  // Crystal glass
+  crystal:new THREE.MeshStandardMaterial({color:0xffffff,metalness:0,roughness:0,transparent:true,opacity:.06,side:THREE.FrontSide}),
+  // Black dial areas
+  black:new THREE.MeshStandardMaterial({color:0x080808,metalness:.1,roughness:.9}),
+};
+
+/* ── WATCH GROUP ── */
+const WG=new THREE.Group();
+S.add(WG);
+
+// ─── CASE ───
+function buildCase(){
+  const g=new THREE.Group();
+
+  // === CASE TUBE - proper watch case proportions ===
+  // Watch case: radius 1.0, thickness 0.38 (the "height" of the cylinder along Z)
+  const caseGeo=new THREE.CylinderGeometry(1.0,1.0,0.38,80,1,false);
+  const caseMesh=new THREE.Mesh(caseGeo,M.steelD);
+  caseMesh.rotation.x=Math.PI/2;
+  caseMesh.receiveShadow=true;caseMesh.castShadow=true;
+  g.add(caseMesh);
+
+  // Case front edge ring
+  const frontRing=new THREE.Mesh(new THREE.TorusGeometry(1.0,0.04,16,80),M.steel);
+  frontRing.position.z=0.19;g.add(frontRing);
+
+  // Case back edge ring
+  const backRing=new THREE.Mesh(new THREE.TorusGeometry(1.0,0.03,12,80),M.steel);
+  backRing.position.z=-0.19;g.add(backRing);
+
+  // Caseback disc
+  const cbk=new THREE.Mesh(new THREE.CircleGeometry(0.96,80),M.steelB);
+  cbk.position.z=-0.20;cbk.rotation.x=Math.PI;g.add(cbk);
+
+  // === FLUTED BEZEL ===
+  // Bezel ring
+  const bzRing=new THREE.Mesh(new THREE.TorusGeometry(1.02,0.05,14,80),M.steel);
+  bzRing.position.z=0.19;g.add(bzRing);
+  // Flutes
+  for(let i=0;i<64;i++){
+    const a=(i/64)*Math.PI*2;
+    const f=new THREE.Mesh(new THREE.BoxGeometry(0.012,i%4===0?0.072:0.048,0.036),M.steelB);
+    f.position.set(Math.cos(a)*1.035,Math.sin(a)*1.035,0.20);
+    f.rotation.z=a;g.add(f);
+  }
+
+  // === CRYSTAL ===
+  const crys=new THREE.Mesh(new THREE.CircleGeometry(0.94,80),M.crystal);
+  crys.position.z=0.22;g.add(crys);
+  // Crystal edge highlight
+  const crysEdge=new THREE.Mesh(new THREE.TorusGeometry(0.94,0.012,8,80),M.crystal);
+  crysEdge.position.z=0.22;g.add(crysEdge);
+
+  // === LUGS — properly attached to case at 12/6 positions ===
+  // Top lugs (12 o'clock side, positive Y)
+  const lugPositions=[
+    {x:-0.52,y:0.96},{x:0.52,y:0.96},  // top
+    {x:-0.52,y:-0.96},{x:0.52,y:-0.96}, // bottom
+  ];
+  lugPositions.forEach(({x,y})=>{
+    // Lug body
+    const lug=new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.11,0.36,20),M.steel);
+    lug.position.set(x,y,0);lug.rotation.x=Math.PI/2;
+    lug.castShadow=true;g.add(lug);
+    // Lug pin hole
+    const pin=new THREE.Mesh(new THREE.CylinderGeometry(0.038,0.038,0.42,12),M.steelD);
+    pin.position.set(x,y,0);pin.rotation.x=Math.PI/2;g.add(pin);
+    // Lug connector to case (tapered block)
+    const conn=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.16,0.36),M.steel);
+    conn.position.set(x,y*0.88,0);g.add(conn);
+  });
+
+  // === CROWN (3 o'clock position) ===
+  const crown=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.09,0.28,24),M.steel);
+  crown.position.set(1.14,-0.16,0.04);crown.rotation.z=Math.PI/2;g.add(crown);
+  // Crown knurling
+  for(let i=0;i<22;i++){
+    const a=(i/22)*Math.PI*2;
+    const k=new THREE.Mesh(new THREE.BoxGeometry(0.28,0.01,0.012),M.steelD);
+    k.position.set(1.14,-0.16,0.04);k.rotation.x=a;g.add(k);
+  }
+  // Crown pusher pipe
+  const cp=new THREE.Mesh(new THREE.CylinderGeometry(0.038,0.038,0.14,12),M.steelD);
+  cp.position.set(1.05,-0.16,0.04);cp.rotation.z=Math.PI/2;g.add(cp);
+
+  WG.add(g);
+}
+
+// ─── MOVEMENT / DIAL ───
+const GEARS=[];
+let hH,mH,sH;
+function buildMovement(){
+  const g=new THREE.Group();
+  g.position.z=0.02;
+
+  // Mainplate — open skeleton, just a thin ring base
+  const mp=new THREE.Mesh(new THREE.TorusGeometry(0.90,0.035,10,80),M.bridge);
+  mp.position.z=0.07;g.add(mp);
+
+  // Inner chapter ring
+  const ir=new THREE.Mesh(new THREE.TorusGeometry(0.85,0.015,8,80),M.steelD);
+  ir.position.z=0.08;g.add(ir);
+
+  // ─── BRIDGES (3 main bridges as elongated shapes) ───
+  const bridgeDefs=[
+    {x:-0.02,y:0.22,rz:-0.35,w:0.55,h:0.048},{x:0.15,y:-0.15,rz:0.55,w:0.58,h:0.044},
+    {x:-0.32,y:-0.28,rz:-1.1,w:0.48,h:0.042},{x:0.05,y:0.52,rz:0,w:0.40,h:0.038},
+    {x:-0.52,y:0.04,rz:Math.PI/2,w:0.44,h:0.038},
+  ];
+  bridgeDefs.forEach(({x,y,rz,w,h})=>{
+    const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,0.035),M.bridge);
+    b.position.set(x,y,0.10);b.rotation.z=rz;b.castShadow=true;g.add(b);
+  });
+
+  // ─── BARREL (gold, 12 o'clock area) ───
+  const barrelDisc=new THREE.Mesh(new THREE.CylinderGeometry(0.30,0.30,0.038,40),M.goldB);
+  barrelDisc.rotation.x=Math.PI/2;barrelDisc.position.set(-0.1,0.18,0.06);g.add(barrelDisc);
+  const barrelRing=new THREE.Mesh(new THREE.TorusGeometry(0.30,0.016,8,40),M.gold);
+  barrelRing.position.set(-0.1,0.18,0.06);g.add(barrelRing);
+
+  // ─── GEARS ───
+  function makeGear(teeth,r,d,mat){
+    const shape=new THREE.Shape();
+    const step=Math.PI*2/teeth,tf=0.40;
+    for(let i=0;i<teeth;i++){
+      const a0=i*step,a1=a0+step*tf,a2=a0+step*(1-tf);
+      const ir2=r*0.72;
+      if(i===0)shape.moveTo(Math.cos(a0)*ir2,Math.sin(a0)*ir2);
+      else shape.lineTo(Math.cos(a0)*ir2,Math.sin(a0)*ir2);
+      shape.lineTo(Math.cos(a1)*r,Math.sin(a1)*r);
+      shape.lineTo(Math.cos(a2)*r,Math.sin(a2)*r);
+    }
+    shape.closePath();
+    // Hub hole
+    const hole=new THREE.Path();
+    for(let i=0;i<=32;i++){const a=(i/32)*Math.PI*2;if(i===0)hole.moveTo(Math.cos(a)*r*.22,Math.sin(a)*r*.22);else hole.lineTo(Math.cos(a)*r*.22,Math.sin(a)*r*.22);}
+    shape.holes.push(hole);
+    return new THREE.Mesh(new THREE.ExtrudeGeometry(shape,{depth:d,bevelEnabled:true,bevelSize:.005,bevelThickness:.005,bevelSegments:1}),mat);
+  }
+
+  // Main barrel gear
+  const g1=makeGear(22,0.28,0.052,M.gold);g1.position.set(-0.1,0.18,0.068);g1.userData={sp:0.8,base:0};g.add(g1);GEARS.push(g1);
+  // Center wheel
+  const g2=makeGear(18,0.22,0.046,M.bridge);g2.position.set(0.28,-0.14,0.07);g2.userData={sp:-1.1,base:0.4};g.add(g2);GEARS.push(g2);
+  // Third wheel
+  const g3=makeGear(14,0.17,0.040,M.steelD);g3.position.set(-0.28,-0.36,0.07);g3.userData={sp:1.4,base:1.0};g.add(g3);GEARS.push(g3);
+  // Escape wheel
+  const g4=makeGear(15,0.16,0.038,M.gold);g4.position.set(0.36,0.30,0.07);g4.userData={sp:-1.3,base:0.6};g.add(g4);GEARS.push(g4);
+
+  // ─── BALANCE WHEEL ───
+  const balPos={x:-0.36,y:0.44};
+  const balRim=new THREE.Mesh(new THREE.TorusGeometry(0.148,0.011,8,40),M.steel);
+  balRim.position.set(balPos.x,balPos.y,0.10);balRim.userData={isBalance:true};g.add(balRim);GEARS.push(balRim);
+  for(let i=0;i<4;i++){
+    const a=(i/4)*Math.PI*2;
+    const sp=new THREE.Mesh(new THREE.CylinderGeometry(0.006,0.006,0.296,8),M.steel);
+    sp.rotation.z=a+Math.PI/2;sp.position.set(balPos.x,balPos.y,0.10);sp.userData={isBalance:true};
+    g.add(sp);GEARS.push(sp);
+  }
+  // Balance jewel
+  const balJ=new THREE.Mesh(new THREE.SphereGeometry(0.022,12,8),M.ruby);
+  balJ.position.set(balPos.x,balPos.y,0.13);g.add(balJ);
+
+  // ─── HOUR MARKERS ───
+  for(let i=0;i<12;i++){
+    const a=(i/12)*Math.PI*2-Math.PI/2;
+    const isQ=i%3===0;
+    const mk=new THREE.Mesh(new THREE.BoxGeometry(isQ?.05:.03,isQ?.15:.09,.022),M.steel);
+    mk.position.set(Math.cos(a)*.72,Math.sin(a)*.72,.15);mk.rotation.z=a+Math.PI/2;g.add(mk);
+  }
+  // Minute ticks
+  for(let i=0;i<60;i++){
+    if(i%5===0)continue;
+    const a=(i/60)*Math.PI*2;
+    const t=new THREE.Mesh(new THREE.BoxGeometry(.012,.04,.016),M.steelD);
+    t.position.set(Math.cos(a)*.82,Math.sin(a)*.82,.13);t.rotation.z=a;g.add(t);
+  }
+
+  // ─── SCREWS (blue cobalt) ───
+  const scrPos=[[-0.5,0.5],[.5,.44],[-.52,-.42],[.5,-.5],[0,.78],[0,-.78],[-.78,0],[.78,0],[-.2,-.7],[.2,.7],[-.6,.2],[.6,-.2]];
+  scrPos.forEach(([x,y])=>{
+    const sc=new THREE.Mesh(new THREE.CylinderGeometry(0.026,0.026,0.052,16),M.blue);
+    sc.rotation.x=Math.PI/2;sc.position.set(x,y,0.13);g.add(sc);
+    // Screw head slot
+    const slot=new THREE.Mesh(new THREE.BoxGeometry(0.052,0.006,.004),M.black);
+    slot.position.set(x,y,0.16);g.add(slot);
+  });
+
+  // ─── JEWELS (purple ruby) ───
+  const jewPos=[[-0.1,.18],[.28,-.14],[-.28,-.36],[.36,.30],[-.36,.44],[.14,-.54],[-.54,.14],[0,.62],[-.62,0],[.6,.06],[-0.18,-.56],[.48,-.26]];
+  jewPos.forEach(([x,y])=>{
+    const j=new THREE.Mesh(new THREE.SphereGeometry(0.024,14,10),M.ruby);
+    j.position.set(x,y,0.12);g.add(j);
+    const jr=new THREE.Mesh(new THREE.TorusGeometry(0.030,0.006,6,20),M.gold);
+    jr.position.set(x,y,0.12);g.add(jr);
+  });
+
+  // ─── HANDS ───
+  hH=new THREE.Group();hH.position.z=0.18;
+  const h1=new THREE.Mesh(new THREE.BoxGeometry(0.038,0.42,0.018),M.steel);h1.position.y=0.21;
+  const h2=new THREE.Mesh(new THREE.BoxGeometry(0.038,0.08,0.018),M.steel);h2.position.y=-0.04;
+  hH.add(h1,h2);g.add(hH);
+
+  mH=new THREE.Group();mH.position.z=0.20;
+  const m1=new THREE.Mesh(new THREE.BoxGeometry(0.026,0.66,0.016),M.steel);m1.position.y=0.33;
+  const m2=new THREE.Mesh(new THREE.BoxGeometry(0.026,0.07,0.016),M.steel);m2.position.y=-0.035;
+  mH.add(m1,m2);g.add(mH);
+
+  sH=new THREE.Group();sH.position.z=0.22;
+  const s1=new THREE.Mesh(new THREE.BoxGeometry(0.009,0.72,0.012),M.gold);s1.position.y=0.28;
+  const s2=new THREE.Mesh(new THREE.BoxGeometry(0.009,0.18,0.012),M.gold);s2.position.y=-0.09;
+  sH.add(s1,s2);g.add(sH);
+
+  // Center cap
+  const cap=new THREE.Mesh(new THREE.CylinderGeometry(0.038,0.038,0.038,20),M.gold);
+  cap.rotation.x=Math.PI/2;cap.position.z=0.22;g.add(cap);
+
+  WG.add(g);
+}
+
+// ─── BRACELET — connected to case at lug positions ───
+function buildBracelet(){
+  const g=new THREE.Group();
+
+  // Bracelet is 1.88 wide to match lug width, attaches at Y ±0.96
+  // Links taper and curve away naturally
+  for(let side=0;side<2;side++){
+    const dir=side===0?1:-1;
+    const numLinks=9;
+
+    for(let i=0;i<numLinks;i++){
+      // Y position: starts at lug attachment, moves outward
+      const y=dir*(0.96+0.16+i*0.215);
+      // Bend away from dial as links get further from case
+      const bend=i*0.06;
+      const z=-bend;
+      // Links get slightly narrower away from case
+      const w=Math.max(1.62,1.86-i*.025);
+
+      // Center link (brushed, wider)
+      const cl=new THREE.Mesh(new THREE.BoxGeometry(w*.58,0.19,0.24-bend*.01),M.steelB);
+      cl.position.set(0,y,z);cl.castShadow=true;g.add(cl);
+
+      // Two side links (polished)
+      [-w*.305,w*.305].forEach(xo=>{
+        const sl=new THREE.Mesh(new THREE.BoxGeometry(w*.35,0.19,0.22-bend*.01),M.steel);
+        sl.position.set(xo,y,z);sl.castShadow=true;g.add(sl);
+      });
+
+      // Gap lines between links
+      [-w*.135,w*.135].forEach(xo=>{
+        const dv=new THREE.Mesh(new THREE.BoxGeometry(0.008,0.20,0.25),M.black);
+        dv.position.set(xo,y,z);g.add(dv);
+      });
+
+      // Horizontal groove between this row and next
+      if(i<numLinks-1){
+        const groove=new THREE.Mesh(new THREE.BoxGeometry(w,0.012,0.04),M.black);
+        groove.position.set(0,y+dir*.107,z);g.add(groove);
+      }
+    }
+
+    // Clasp at end
+    const claspY=dir*(0.96+0.16+numLinks*0.215+0.12);
+    const clasp=new THREE.Mesh(new THREE.BoxGeometry(1.72,0.22,0.18),M.steelB);
+    clasp.position.set(0,claspY,-(numLinks*0.06+0.06));g.add(clasp);
+    // Clasp button
+    const cb=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,0.04,16),M.steel);
+    cb.rotation.x=Math.PI/2;cb.position.set(0,claspY,-(numLinks*0.06+0.06)-.12);g.add(cb);
+  }
+
+  WG.add(g);
+}
+
+// ─── PARTICLES ───
+function buildParticles(){
+  const N=5000;const geo=new THREE.BufferGeometry();
+  const pos=new Float32Array(N*3),col=new Float32Array(N*3);
+  for(let i=0;i<N;i++){
+    const phi=Math.random()*Math.PI*2,theta=Math.acos(Math.random()*2-1);
+    const r=12+Math.random()*20;
+    pos[i*3]=r*Math.sin(theta)*Math.cos(phi);pos[i*3+1]=r*Math.sin(theta)*Math.sin(phi);pos[i*3+2]=r*Math.cos(theta);
+    const t=Math.random();
+    if(t<.6){col[i*3]=.72;col[i*3+1]=.72;col[i*3+2]=.70;}
+    else if(t<.85){col[i*3]=.78;col[i*3+1]=.62;col[i*3+2]=.12;}
+    else{col[i*3]=.12;col[i*3+1]=.30;col[i*3+2]=.78;}
+  }
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('color',new THREE.BufferAttribute(col,3));
+  const pts=new THREE.Points(geo,new THREE.PointsMaterial({size:.026,vertexColors:true,transparent:true,opacity:.45,sizeAttenuation:true}));
+  S.add(pts);return pts;
+}
+
+buildCase();buildMovement();buildBracelet();
+const PTCL=buildParticles();
+
+// Initial watch pose — tilted naturally
+WG.rotation.set(0.20,-0.30,0.0);
+
+/* ── CINEMATIC SCROLL STATES ──
+   [prog, camX,camY,camZ, watchRX,watchRY,watchRZ, jewelGlow]
+*/
+const SS=[
+  [0.00,  0.0, 1.2, 9.0,  0.20,-0.30, 0.0,  0.0],
+  [0.15, -0.4, 0.8, 7.8,  0.18, 0.40, 0.0,  0.0],
+  [0.30, -0.5, 0.5, 6.5,  0.15, 1.20, 0.0,  0.0],
+  [0.45,  0.0, 0.0, 4.8,  0.05, 2.00, 0.0,  2.5],  // top down — gears visible
+  [0.58,  0.0, 0.0, 4.2, -0.10, 2.80, 0.0,  3.0],  // jewels glow
+  [0.70,  0.0, 2.2, 5.2, -1.30, 3.50, 0.0,  1.5],  // tilt — crystal view
+  [0.84,  1.8, 0.2, 6.0,  0.12, 4.40, 0.20, 0.5],  // bracelet side
+  [1.00,  0.0, 0.5,10.0,  0.18, 5.20, 0.0,  0.0],  // pull back
+];
+function lerp(a,b,t){return a+(b-a)*t;}
+function smoothstep(t){return t*t*(3-2*t);}
+function getState(p){
+  let lo=SS[0],hi=SS[SS.length-1];
+  for(let i=0;i<SS.length-1;i++){if(p>=SS[i][0]&&p<=SS[i+1][0]){lo=SS[i];hi=SS[i+1];break;}}
+  const t=lo[0]===hi[0]?0:smoothstep((p-lo[0])/(hi[0]-lo[0]));
+  return lo.map((v,i)=>i===0?p:lerp(v,hi[i],t));
+}
+
+const TEXT=[
+  {id:'t0',s:0.00,e:0.15},
+  {id:'t1',s:0.13,e:0.31},
+  {id:'t2',s:0.29,e:0.47},
+  {id:'t3',s:0.45,e:0.62},
+  {id:'t4',s:0.60,e:0.75},
+  {id:'t5',s:0.73,e:0.88},
+  {id:'t6',s:0.86,e:1.00},
+];
+
+let tCX=0,tCY=1.2,tCZ=9,cCX=0,cCY=1.2,cCZ=9;
+let tRX=.2,tRY=-.3,tRZ=0,cRX=.2,cRY=-.3,cRZ=0;
+let gspd=0.004,gtime=0,sProg=0;
+
+function onScroll(){
+  const sy=window.scrollY,maxY=document.body.scrollHeight-innerHeight;
+  sProg=Math.max(0,Math.min(1,sy/maxY));
+  document.getElementById('pb').style.width=(sProg*100)+'%';
+  document.getElementById('nv').classList.toggle('sol',sy>60);
+
+  const st=getState(sProg);
+  tCX=st[1];tCY=st[2];tCZ=st[3];
+  tRX=st[4];tRY=st[5];tRZ=st[6];
+  const jg=st[7];
+  jl1.intensity=jg*.8;jl2.intensity=jg*.5;
+  gspd=0.003+sProg*.018;
+
+  TEXT.forEach(({id,s,e})=>{
+    const el=document.getElementById(id);if(!el)return;
+    const fl=.035;let op=0;
+    if(sProg>=s&&sProg<=e)op=Math.min(1,(sProg-s)/fl,(e-sProg)/fl);
+    el.style.opacity=Math.max(0,op);
+  });
+  const si=document.getElementById('si');
+  if(si)si.style.opacity=sProg<.02?1:Math.max(0,1-(sProg-.02)/.03);
+}
+
+window.addEventListener('scroll',onScroll,{passive:true});
+
+/* ── RENDER LOOP ── */
+const clock=new THREE.Clock();
+let live=false;
+function loop(){
+  requestAnimationFrame(loop);if(!live)return;
+  const dt=clock.getDelta();gtime+=dt;
+
+  // Camera smooth follow
+  const cs=0.05;
+  cCX+=(tCX-cCX)*cs;cCY+=(tCY-cCY)*cs;cCZ+=(tCZ-cCZ)*cs;
+  CAM.position.set(cCX,cCY,cCZ);
+  CAM.lookAt(0,0,0);
+
+  // Watch rotation smooth follow
+  const rs=0.035;
+  cRX+=(tRX-cRX)*rs;cRY+=(tRY-cRY)*rs;cRZ+=(tRZ-cRZ)*rs;
+  WG.rotation.set(cRX,cRY,cRZ);
+  document.getElementById('hr').textContent=`RX ${cRX.toFixed(2)} RY ${cRY.toFixed(2)}`;
+
+  // Gear animation
+  const gs=gspd*12;
+  GEARS.forEach(gr=>{
+    if(!gr.userData)return;
+    if(gr.userData.isBalance){
+      gr.rotation.z=Math.sin(gtime*gspd*48)*.9;
+    }else if(gr.userData.sp!==undefined){
+      gr.rotation.z=gr.userData.base+gtime*gs*gr.userData.sp;
+    }
+  });
+
+  // Real hands
+  const now=new Date();
+  const hr=now.getHours()%12+now.getMinutes()/60;
+  const mn=now.getMinutes()+now.getSeconds()/60;
+  const sc=now.getSeconds()+now.getMilliseconds()/1000;
+  if(hH)hH.rotation.z=-(hr/12)*Math.PI*2;
+  if(mH)mH.rotation.z=-(mn/60)*Math.PI*2;
+  if(sH)sH.rotation.z=-(sc/60)*Math.PI*2;
+
+  // Particles drift
+  PTCL.rotation.y+=0.00005;PTCL.rotation.x+=0.000022;
+
+  R.render(S,CAM);
+}
+
+/* ── LOADER ANIMATION ── */
+(function load(){
+  let p=0;
+  const iv=setInterval(()=>{
+    p+=Math.random()*6+2.5;if(p>100)p=100;
+    document.getElementById('lf').style.width=p+'%';
+    document.getElementById('lp').textContent=`Crafting — ${Math.floor(p)}%`;
+    if(p>=100){clearInterval(iv);setTimeout(()=>{document.getElementById('ldr').classList.add('out');live=true;onScroll();document.getElementById('t0').style.opacity=1;},600);}
+  },65);
+})();
+loop();onScroll();
+</script>
+</body>
+</html>
